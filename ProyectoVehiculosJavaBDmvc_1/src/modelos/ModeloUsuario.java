@@ -3,8 +3,11 @@ package modelos;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ModeloUsuario {
     String usuario;
@@ -40,4 +43,34 @@ public class ModeloUsuario {
             throw e;
         }
     }
+   
+    public List<Object[]> obtenerUsuarios() throws SQLException {
+        List<Object[]> usuarios = new ArrayList<>();
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            if (conex == null || conex.isClosed()) {
+                hacerConexion();
+            }
+            connection = conex;
+
+            statement = connection.createStatement();
+            String sql = "SELECT cedula, contraseña FROM usuario";
+            resultSet = statement.executeQuery(sql);
+
+            while (resultSet.next()) {
+                Object[] fila = new Object[2];
+                fila[0] = resultSet.getInt("cedula");
+                fila[1] = resultSet.getString("contraseña");
+                usuarios.add(fila);
+            }
+        } finally {
+            if (resultSet != null) try { resultSet.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (statement != null) try { statement.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return usuarios;
+    }
+    
 }
